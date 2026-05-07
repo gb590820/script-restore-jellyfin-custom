@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Galerie d'Avatars Steam - Optimisée</title>
+<style>
+  body {
+    background-color: #1a1a1a;
+    color: #f0f0f0;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+  }
+  header {
+    background-color: #333;
+    padding: 10px;
+    text-align: center;
+  }
+  header img {
+    max-height: 100px;
+  }
+  .gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(184px, 1fr));
+    grid-gap: 4px;
+    padding: 10px;
+  }
+  
+  .gallery-item {
+    position: relative;
+    border: 1px solid #666;
+    overflow: hidden;
+    cursor: pointer;
+    background-color: #2a2a2a;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+    min-height: 184px;
+  }
+  
+  .gallery-item:hover {
+    transform: scale(1.02);
+    border-color: #007BFF;
+    box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
+  }
+  
+  .gallery-item img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+  }
+  
+  /* Static image (canvas with first frame) */
+  .static-canvas {
+    display: block;
+    max-width: 100%;
+    height: auto;
+  }
+  
+  /* Animated image (hidden by default) */
+  .animated-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    max-width: 100%;
+    height: auto;
+    display: none;
+    z-index: 2;
+  }
+  
+  /* Loading state */
+  .gallery-item.loading {
+    background: #2a2a2a url('data:image/svg+xml;charset=utf-8,%3Csvg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 40 40"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg transform="translate(1 1)" stroke="%23007BFF" stroke-width="2"%3E%3Ccircle stroke-opacity=".5" cx="18" cy="18" r="18"/%3E%3Cpath d="M36 18c0-9.94-8.06-18-18-18"%3E%3CanimateTransform attributeName="transform" type="rotate" from="0 18 18" to="360 18 18" dur="1s" repeatCount="indefinite"/%3E%3C/path%3E%3C/g%3E%3C/g%3E%3C/svg%3E') center center no-repeat;
+  }
+  
+  .gallery-item.loading .static-canvas {
+    opacity: 0.3;
+  }
+  
+  .gallery-item.loaded .static-canvas {
+    opacity: 1;
+    transition: opacity 0.3s ease;
+  }
+  
+  /* Info overlay */
+  .info-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+    color: white;
+    padding: 8px;
+    font-size: 12px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    text-align: center;
+  }
+  
+  .gallery-item:hover .info-overlay {
+    opacity: 1;
+  }
+  
+  /* Progress indicator */
+  .progress-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 0%;
+    height: 3px;
+    background: linear-gradient(90deg, #007BFF, #0056b3);
+    z-index: 9999;
+    transition: width 0.3s ease;
+  }
+  
+  /* Stats */
+  .stats {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 12px;
+    z-index: 1000;
+  }
+</style>
+<script defer src="/web/avatars/avatars.js"></script>
+</head>
+<body>
+<div class="progress-bar" id="progressBar"></div>
+<div class="stats" id="stats">Initialisation...</div>
+
+<header>
+<img alt="Logo" onclick="updateUserImage('logo.png')" src="logo.png" style="cursor: pointer;"/>
+</header>
+<h1>Galerie d'Avatars Steam - Survol pour Animer</h1>
+<p style="text-align: center; color: #ccc;">
+  Les GIFs sont optimisés pour les performances - survolez n'importe quel avatar pour le voir s'animer !
+</p>
+<div class="gallery" id="gallery">
+<!-- Gallery items will be loaded here by JavaScript -->
+</div>
+
+<script>
+let loadedCount = 0;
+let totalCount = 0;
+let isLoading = true;
+
+// Intersection Observer for lazy loading
+const imageObserver = new IntersectionObserver((entries, observer) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      const item = entry.target;
+      const filename = item.dataset.filename;
+      if (filename) {
+        loadStaticImage(item, filename);
+        observer.unobserve(item);
+      }
+    }
+  });
+}, {
+  rootMargin: '50px 0px',
+  threshold: 0.01
+});
+
+// Function to extract first frame from GIF and display it
+function loadStaticImage(item, filename) {
+  item.classList.add('loading');
+  
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  
+  img.onload = function() {
+    // Create canvas to capture first frame
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    
+    canvas.width = this.naturalWidth;
+    canvas.height = this.naturalHeight;
+    canvas.className = 'static-canvas';
+    
+    // Draw first frame
+    ctx.drawImage(this, 0, 0);
+    
+    // Replace loading content with static canvas
+    const existingCanvas = item.querySelector('.static-canvas');
+    if (existingCanvas) {
+      existingCanvas.remove();
+    }
+    
+    // Insert canvas before animated image
+    const animatedImg = item.querySelector('.animated-image');
+    if (animatedImg) {
+      item.insertBefore(canvas, animatedImg);
+    } else {
+      item.appendChild(canvas);
+    }
+    
+    item.classList.remove('loading');
+    item.classList.add('loaded');
+    loadedCount++;
+    updateProgress();
+  };
+  
+  img.onerror = function() {
+    item.classList.remove('loading');
+    item.innerHTML = '<div style="padding: 20px; text-align: center; color: #666;">Échec du chargement</div>';
+    loadedCount++;
+    updateProgress();
+  };
+  
+  img.src = filename;
+}
+
+// Set up hover animation between static canvas and animated GIF
+function setupHoverAnimation(item, filename) {
+  let animatedImg = item.querySelector('.animated-image');
+  let animatedLoaded = false;
+  
+  item.addEventListener('mouseenter', function() {
+    if (!animatedLoaded) {
+      // Create and load animated version
+      if (!animatedImg) {
+        animatedImg = document.createElement('img');
+        animatedImg.className = 'animated-image';
+        animatedImg.alt = 'Avatar Steam';
+        item.appendChild(animatedImg);
+      }
+      
+      animatedImg.src = filename;
+      animatedImg.onload = function() {
+        animatedLoaded = true;
+        showAnimated();
+      };
+    } else {
+      showAnimated();
+    }
+    
+    function showAnimated() {
+      const staticCanvas = item.querySelector('.static-canvas');
+      if (staticCanvas) staticCanvas.style.display = 'none';
+      animatedImg.style.display = 'block';
+    }
+  });
+  
+  item.addEventListener('mouseleave', function() {
+    // Show static canvas
+    const staticCanvas = item.querySelector('.static-canvas');
+    if (staticCanvas) staticCanvas.style.display = 'block';
+    if (animatedImg) animatedImg.style.display = 'none';
+  });
+}
+
+// Update loading progress
+function updateProgress() {
+  const progress = (loadedCount / totalCount) * 100;
+  document.getElementById('progressBar').style.width = progress + '%';
+  document.getElementById('stats').textContent = `Chargés: ${loadedCount}/${totalCount} (${Math.round(progress)}%)`;
+  
+  if (loadedCount >= totalCount) {
+    setTimeout(() => {
+      document.getElementById('progressBar').style.opacity = '0';
+      document.getElementById('stats').textContent = `${totalCount} avatars prêts`;
+    }, 500);
+  }
+}
+
+// Create gallery item
+function createGalleryItem(filename) {
+  const item = document.createElement('div');
+  item.className = 'gallery-item';
+  item.dataset.filename = filename;
+  item.onclick = () => updateUserImage(filename);
+  
+  // Create animated image placeholder (hidden initially)
+  const animatedImg = document.createElement('img');
+  animatedImg.className = 'animated-image';
+  animatedImg.alt = 'Avatar Steam';
+  
+  const infoOverlay = document.createElement('div');
+  infoOverlay.className = 'info-overlay';
+  infoOverlay.textContent = 'Cliquer pour utiliser';
+  
+  item.appendChild(animatedImg);
+  item.appendChild(infoOverlay);
+  
+  // Set up hover animation
+  setupHoverAnimation(item, filename);
+  
+  // Observe for lazy loading
+  imageObserver.observe(item);
+  
+  return item;
+}
+
+// Extract GIF filenames from the original gallery
+async function extractGifFilenames() {
+  try {
+    const response = await fetch('gallery.html');
+    const text = await response.text();
+    
+    // Extract all .gif filenames from the HTML
+    const gifMatches = text.match(/src="([^"]+\.gif)"/gi); // Added 'i' flag for case insensitive
+    
+    if (gifMatches) {
+      const filenames = gifMatches
+        .map(match => match.match(/src="([^"]+\.gif)"/i)[1]) // Added 'i' flag for case insensitive
+        .filter((filename, index, array) => array.indexOf(filename) === index) // Remove duplicates
+        .sort(); // Sort alphabetically
+      
+      return filenames;
+    }
+    
+    return [];
+  } catch (error) {
+    console.error('Erreur lors de l\'extraction des noms de fichiers GIF:', error);
+    return [];
+  }
+}
+
+// Initialize gallery
+async function initializeGallery() {
+  const gallery = document.getElementById('gallery');
+  const gifFilenames = await extractGifFilenames();
+  
+  if (gifFilenames.length === 0) {
+    gallery.innerHTML = '<div style="text-align: center; padding: 40px; color: #666;">Aucun fichier GIF trouvé ou erreur de chargement de la galerie.</div>';
+    return;
+  }
+  
+  totalCount = gifFilenames.length;
+  document.getElementById('stats').textContent = `${totalCount} avatars trouvés...`;
+  
+  // Create gallery items
+  gifFilenames.forEach(filename => {
+    const item = createGalleryItem(filename);
+    gallery.appendChild(item);
+  });
+  
+  // Update stats
+  document.getElementById('stats').textContent = `0/${totalCount} chargés`;
+  
+  console.log(`Galerie créée avec ${totalCount} avatars GIF`);
+}
+
+// Initialize when page loads
+document.addEventListener('DOMContentLoaded', function() {
+  initializeGallery();
+});
+
+// Performance monitoring
+let hoverTimeouts = new Map();
+
+document.addEventListener('mouseover', function(e) {
+  if (e.target.closest('.gallery-item')) {
+    const item = e.target.closest('.gallery-item');
+    if (hoverTimeouts.has(item)) {
+      clearTimeout(hoverTimeouts.get(item));
+    }
+  }
+});
+
+document.addEventListener('mouseout', function(e) {
+  if (e.target.closest('.gallery-item')) {
+    const item = e.target.closest('.gallery-item');
+    // Optional: Clean up after a delay to save resources
+    const timeout = setTimeout(() => {
+      // Could add logic here to clean up resources if needed
+    }, 5000);
+    hoverTimeouts.set(item, timeout);
+  }
+});
+</script>
+</body>
+</html>

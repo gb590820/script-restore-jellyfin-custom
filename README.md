@@ -1,61 +1,56 @@
-# Viveo Jellyfin Customizations
+# Restoration and Customization Scripts — Jellyfin → Viveo
 
-This repository contains a restoration script that reapplies Viveo-specific customizations to a Jellyfin installation after Jellyfin updates.
+This repository contains personal scripts to restore and modify a standard Jellyfin installation to match the look and configuration used on my Viveo platform. It is a toolbox for applying customizations, restorations, and optimizations.
 
-## What it does
+## Repository contents
 
-- Updates Jellyfin branding from Jellyfin to Viveo in the web UI.
-- Replaces the favicon with a custom Viveo favicon.
-- Injects custom scripts into `index.html`.
-- Replaces Jellyfin web chunks with Viveo-specific UI behavior.
-- Copies branded assets from a local source directory.
-- Creates a timestamped backup before applying changes.
+- `restoreCustom/` — restoration and customization scripts (main script: `restore-viveo-customizations.sh`).
+- `optimizationGIF/` — files and HTML pages for GIF optimization and asset checks.
+
+## Purpose
+
+Adapt a vanilla Jellyfin instance into a configuration and appearance consistent with the Viveo platform (themes, configuration files, optimized assets, and other adjustments).
 
 ## Requirements
 
-- Bash
-- Python 3
-- A Jellyfin installation with writable web assets
-- A local `web_` directory containing the custom source files used by the script
+- A working Jellyfin installation.
+- Back up important data (configs, databases, media) before applying changes.
 
-## Expected source files
+## Quick start
 
-The script reads custom assets from:
-
-- `web_/favicon.ico`
-- `web_/assets/img/banner-dark.png`
-- `web_/monitoruserid.js`
-- `web_/holidays.js`
-
-## Usage
-
-Run the script after a Jellyfin update:
+1. Review the script(s) and update any paths or variables to match your installation.
+2. Make the main script executable:
 
 ```bash
-sudo bash restore-viveo-customizations.sh
+chmod +x restoreCustom/restore-viveo-customizations.sh
 ```
 
-The script will:
-
-1. Check that Jellyfin web files exist.
-2. Detect whether the Viveo changes already appear to be applied.
-3. Create a backup of the current `web` directory.
-4. Patch Jellyfin web files and copy the Viveo assets.
-
-## Notes
-
-- The script is designed to be idempotent where possible.
-- If the `web_` directory is missing, some custom assets will be skipped.
-- Restart Jellyfin after running the script:
+3. Run the script
 
 ```bash
-sudo systemctl restart jellyfin
+sudo ./restoreCustom/restore-viveo-customizations.sh
 ```
 
-## Backup
+Note: Inspect the script before running and test on a development instance if possible.
 
-Each run creates a backup named like:
+## Key files & scripts
 
-```text
-viveo-backup-YYYYMMDD-HHMMSS
-```
+- `restoreCustom/restore-viveo-customizations.sh` — applies Viveo customizations.
+- `optimizationGIF/` — HTML pages and resources to prepare or verify GIF optimizations.
+
+## Viveo base site
+
+The Viveo platform reference site is: https://viveo.borrelly-betta.ts.net/
+
+## Contributing
+
+Add scripts or variants in clearly named subfolders, open an issue to propose changes, or create a branch and submit a pull request. Document each script with its purpose and prerequisites.
+
+
+## Support
+
+Open an issue in this repository for questions, suggestions, or problems related to the scripts.
+
+---
+
+Main restoration script: `restoreCustom/restore-viveo-customizations.sh` — review before running.

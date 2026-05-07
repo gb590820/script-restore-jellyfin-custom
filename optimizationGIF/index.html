@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bibliothèque d'Avatars</title>
+<style>
+  body {
+    background-color: #1a1a1a;
+    color: #f0f0f0;
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+  }
+  img {
+    padding:10px;
+  }
+  header {
+    background-color: #333;
+    padding: 10px;
+    text-align: center;
+  }
+  header h1 {
+    margin: 0;
+  }
+  header img {
+    max-height: 100px;
+  }
+  .container {
+    padding: 20px;
+  }
+  .gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(184px, 1fr));
+    grid-gap: 4px;
+    padding: 10px;
+  }
+  .gallery img {
+    max-width: 100%;
+    height: auto;
+    border: 1px solid #666;
+  }
+  .textbox {
+    background-color: #333;
+    color: #f0f0f0;
+    padding: 10px;
+    margin-bottom: 20px;
+  }
+</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/MakD/Jellyfin-Media-Bar@latest/slideshowpure.css" />
+<script defer src="https://cdn.jsdelivr.net/gh/MakD/Jellyfin-Media-Bar@latest/slideshowpure.js"></script><link rel="stylesheet" href="/HomeScreen/home-screen-sections.css" /></head>
+<body>
+<header>
+  <h1>Bibliothèque d'Avatars</h1>
+</header>
+
+<a href="./pop/pop-optimized.html
+"><img src="./pop/logo.png
+" alt="Pop Culture Animé (Optimisé)
+" style="max-width: 250px;"></a>
+<a href="./Steam/gallery-static-frame.html
+"><img src="./Steam/logo.png
+" alt="Steam Animated Avatars (Optimized)
+" style="max-width: 250px;"></a>
+<a href="./360/360.html
+"><img src="./360/logo.png
+" alt="Xbox 360 Avatars
+" style="max-width: 250px;"></a>
+<a href="./nf/nf.html
+"><img src="./nf/logo.png
+" alt="Netflix Avatars
+" style="max-width: 250px;"></a>
+<a href="./one/one.html
+"><img src="./one/logo.png
+" alt="Xbox One Avatars
+" style="max-width: 250px;"></a>
+<a href="./playstation/playstation.html
+"><img src="./playstation/logo.png
+" alt="Playstation Avatars
+" style="max-width: 250px;"></a>
+<a href="./psx/index.html
+"><img src="./psx/logo.png
+" alt="PSOne Classic Avatars
+" style="max-width: 250px;"></a>
+<a href="./io/index.html
+"><img src="./io/logo.png
+" alt="Inside Out 2 Avatars
+" style="max-width: 250px;"></a>
+<a href="./pp/index-optimized.html
+"><img src="./pp/logo.svg
+" alt="Paramount+ Avatars (Optimisé)
+" style="max-width: 250px;"></a>
+<a href="./pv/index.html
+"><img src="./pv/logo2.png
+" alt="PrimeVideo Avatars
+" style="max-width: 250px;"></a>
+<a href="./dp/index.html
+"><img src="./dp/logo.webp
+" alt="Disney+ Avatars
+" style="max-width: 250px;"></a>
+
+<script plugin="PluginPages" version="1.0.0.0" src="/PluginPages/inject.js" defer></script>
+<script type="text/javascript" plugin="Jellyfin.Plugin.HomeScreenSections" src="/HomeScreen/home-screen-sections.js" defer></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Create back button element
+    const backButton = document.createElement('button');
+  backButton.textContent = 'Retour';
+    backButton.style.position = 'fixed';
+    backButton.style.top = '10px';
+    backButton.style.left = '10px';
+    backButton.style.padding = '8px 12px';
+    backButton.style.backgroundColor = '#333';
+    backButton.style.color = 'white';
+  backButton.style.fontFamily = 'Arial, sans-serif';
+    backButton.style.border = 'none';
+    backButton.style.borderRadius = '4px';
+    backButton.style.cursor = 'pointer';
+    backButton.style.zIndex = '1000';
+    
+    // Add hover effect
+    backButton.addEventListener('mouseover', function() {
+        backButton.style.backgroundColor = '#555';
+    });
+    backButton.addEventListener('mouseout', function() {
+        backButton.style.backgroundColor = '#333';
+    });
+    
+    // Add click event to go back
+    backButton.addEventListener('click', function() {
+      window.location.href = 'https://viveo.borrelly-betta.ts.net/web/#/home';
+    });
+    
+    // Append button to body
+    document.body.appendChild(backButton);
+});
+</script>
+</body>
+</html>
